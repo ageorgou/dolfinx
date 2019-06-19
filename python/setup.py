@@ -15,12 +15,13 @@ if sys.version_info < (3, 5):
 
 VERSION = "2019.2.0.dev0"
 RESTRICT_REQUIREMENTS = ">=2019.2.0.dev0,<2019.3"
+ENTRY_POINTS = {'console_scripts': ['ffc = ffc.__main__:main']}
 
 REQUIREMENTS = [
     "numpy",
+    "cffi",
     "mpi4py",
     "petsc4py",
-    "fenics-ffc",
     "fenics-ufl{}".format(RESTRICT_REQUIREMENTS),
 ]
 
@@ -88,8 +89,16 @@ setup(name='fenics-dolfin',
                 "dolfin.function",
                 "dolfin.fem",
                 "dolfin.la",
-                "dolfin_utils.test"],
+                "dolfin_utils.test",
+                "ffc",
+                "ffc.codegeneration",
+                "ffc.codegeneration.C",
+                "ffc.ir",
+                "ffc.ir.uflacs",
+                "ffc.ir.uflacs.analysis"],
       ext_modules=[CMakeExtension('dolfin.cpp')],
       cmdclass=dict(build_ext=CMakeBuild),
+      package_data={"ffc": [os.path.join('codegeneration', '*.h')]},
       install_requires=REQUIREMENTS,
+      entry_points=ENTRY_POINTS,
       zip_safe=False)
