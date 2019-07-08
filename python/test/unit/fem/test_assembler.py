@@ -91,6 +91,31 @@ def test_basic_assembly():
     assert 2.0 * normA == pytest.approx(A.norm())
 
 
+def test_constants_assembly():
+    mesh = dolfin.generation.UnitSquareMesh(dolfin.MPI.comm_world, 12, 12)
+    V = dolfin.FunctionSpace(mesh, ("Lagrange", 1))
+    u, v = dolfin.TrialFunction(V), dolfin.TestFunction(V)
+
+    f = ufl.Constant(mesh)
+    a = inner(f * u, v) * dx
+    L = inner(f, v) * dx
+
+    a = dolfin.fem.Form(a)._cpp_object
+    a.set_coefficient(0, None)
+    a.set_constant(0, [2.0])
+
+    A = dolfin.fem.assemble_matrix(a)
+    A.assemble()
+    assert isinstance(A, PETSc.Mat)
+
+#    b = dolfin.fem.assemble_vector(L)
+#    b.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
+#    assert isinstance(b, PETSc.Vec)
+
+    normA = A.norm()
+    print(normA)
+
+
 def test_assembly_bcs():
     mesh = dolfin.generation.UnitSquareMesh(dolfin.MPI.comm_world, 12, 12)
     V = dolfin.FunctionSpace(mesh, ("Lagrange", 1))
