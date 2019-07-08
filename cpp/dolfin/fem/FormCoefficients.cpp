@@ -120,7 +120,7 @@ void FormCoefficients::set_const(
   _constants[i] = constant;
 }
 //-----------------------------------------------------------------------------
-std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>>
+std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
 FormCoefficients::get_const(int i) const
 {
   assert(i < (int)_constants.size());

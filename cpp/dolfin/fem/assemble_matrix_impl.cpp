@@ -42,13 +42,8 @@ void fem::impl::assemble_matrix(Mat A, const Form& a,
   // Prepare coefficients
   const FormCoefficients& coefficients = a.coeffs();
   std::vector<const function::Function*> coeff_fn(coefficients.size());
-  std::vector<const Eigen::Array<double, Eigen::Dynamic, 1>*> coeff_const(
-      coefficients.size());
   for (int i = 0; i < coefficients.size(); ++i)
-  {
     coeff_fn[i] = coefficients.get(i).get();
-    coeff_const[i] = coefficients.get_const(i).get();
-  }
 
   // Get array, prefilled with Constants, and offsets for Functions
   std::vector<int> c_offsets = coefficients.offsets();

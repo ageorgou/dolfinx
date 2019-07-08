@@ -62,7 +62,7 @@ public:
     constant);
 
   /// Get constant coefficient i
-  std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>> get_const(int i) const;
+  std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> get_const(int i) const;
 
   /// Original position of coefficient in UFL form
   int original_position(int i) const;
@@ -83,7 +83,7 @@ private:
   std::vector<std::shared_ptr<const function::Function>> _coefficients;
 
   // Constant coefficients
-  std::vector<std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>>> _constants;
+  std::vector<std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>> _constants;
 
   // Copy of 'original positions' in UFL form
   std::vector<int> _original_pos;
