@@ -25,6 +25,7 @@ FormCoefficients::FormCoefficients(
     _names.push_back(std::get<1>(coeff));
     _coefficients.push_back(std::get<2>(coeff));
   }
+  _constants.resize(_coefficients.size());
 }
 //-----------------------------------------------------------------------------
 int FormCoefficients::size() const { return _coefficients.size(); }
@@ -79,7 +80,10 @@ void FormCoefficients::set(
     int i, std::shared_ptr<const function::Function> coefficient)
 {
   if (i >= (int)_coefficients.size())
+  {
     _coefficients.resize(i + 1);
+    _constants.resize(i + 1);
+  }
 
   _coefficients[i] = coefficient;
 }
@@ -89,7 +93,10 @@ void FormCoefficients::set(
 {
   int i = get_index(name);
   if (i >= (int)_coefficients.size())
+  {
     _coefficients.resize(i + 1);
+    _constants.resize(i + 1);
+  }
 
   _coefficients[i] = coefficient;
 }
@@ -98,6 +105,19 @@ std::shared_ptr<const function::Function> FormCoefficients::get(int i) const
 {
   assert(i < (int)_coefficients.size());
   return _coefficients[i];
+}
+//-----------------------------------------------------------------------------
+void FormCoefficients::set_const(
+    int i, std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
+               constant)
+{
+  if (i >= (int)_constants.size())
+  {
+    _coefficients.resize(i + 1);
+    _constants.resize(i + 1);
+  }
+
+  _constants[i] = constant;
 }
 //-----------------------------------------------------------------------------
 std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>>

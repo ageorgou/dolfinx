@@ -56,6 +56,12 @@ public:
   /// Get the Function coefficient i
   std::shared_ptr<const function::Function> get(int i) const;
 
+  /// Set constant coefficient i
+  void set_const(
+    int i, std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
+    constant);
+
+  /// Get constant coefficient i
   std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>> get_const(int i) const;
 
   /// Original position of coefficient in UFL form
