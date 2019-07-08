@@ -53,6 +53,7 @@ void assemble_cells(
     const std::function<void(PetscScalar*, const PetscScalar*, const double*,
                              const int*, const int*)>& kernel,
     const std::vector<const function::Function*>& coefficients,
+    Eigen::Ref<Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> coeff_array,
     const std::vector<int>& offsets);
 
 /// Execute kernel over exterior facets and  accumulate result in Mat

@@ -32,13 +32,47 @@ int FormCoefficients::size() const { return _coefficients.size(); }
 std::vector<int> FormCoefficients::offsets() const
 {
   std::vector<int> n = {0};
-  for (auto& c : _coefficients)
+
+  // Same list size for coefficients and constants: any which are not set
+  // should be nullptr.
+  assert(_coefficients.size() == _constants.size());
+
+  for (std::size_t i = 0; i < _coefficients.size(); ++i)
   {
-    if (!c)
-      throw std::runtime_error("Not all form coefficients have been set.");
-    n.push_back(n.back() + c->function_space()->element->space_dimension());
+    if (_coefficients[i])
+    {
+      assert(!_constants[i]);
+      n.push_back(
+          n.back()
+          + _coefficients[i]->function_space()->element->space_dimension());
+    }
+    else if (_constants[i])
+      n.push_back(n.back() + _constants[i]->size());
+    else
+      throw std::runtime_error(
+          "Not all form coefficients/constants have been set.");
   }
   return n;
+}
+//-----------------------------------------------------------------------------
+Eigen::Array<PetscScalar, Eigen::Dynamic, 1>
+FormCoefficients::array(const std::vector<int>& offsets) const
+{
+  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array(offsets.back());
+
+  // Copy constants into array
+  // FIXME: why copy? maybe we just store the "coeff_array" here prefilled?
+  for (std::size_t i = 0; i < _constants.size(); ++i)
+  {
+    if (_constants[i])
+    {
+      std::copy(_constants[i]->data(),
+                _constants[i]->data() + _constants[i]->size(),
+                coeff_array.data() + offsets[i]);
+    }
+  }
+
+  return coeff_array;
 }
 //-----------------------------------------------------------------------------
 void FormCoefficients::set(
@@ -64,6 +98,13 @@ std::shared_ptr<const function::Function> FormCoefficients::get(int i) const
 {
   assert(i < (int)_coefficients.size());
   return _coefficients[i];
+}
+//-----------------------------------------------------------------------------
+std::shared_ptr<const Eigen::Array<double, Eigen::Dynamic, 1>>
+FormCoefficients::get_const(int i) const
+{
+  assert(i < (int)_constants.size());
+  return _constants[i];
 }
 //-----------------------------------------------------------------------------
 int FormCoefficients::original_position(int i) const

@@ -42,9 +42,18 @@ void fem::impl::assemble_matrix(Mat A, const Form& a,
   // Prepare coefficients
   const FormCoefficients& coefficients = a.coeffs();
   std::vector<const function::Function*> coeff_fn(coefficients.size());
+  std::vector<const Eigen::Array<double, Eigen::Dynamic, 1>*> coeff_const(
+      coefficients.size());
   for (int i = 0; i < coefficients.size(); ++i)
+  {
     coeff_fn[i] = coefficients.get(i).get();
+    coeff_const[i] = coefficients.get_const(i).get();
+  }
+
+  // Get array, prefilled with Constants, and offsets for Functions
   std::vector<int> c_offsets = coefficients.offsets();
+  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array
+      = coefficients.array(c_offsets);
 
   const FormIntegrals& integrals = a.integrals();
   using type = fem::FormIntegrals::Type;
@@ -55,7 +64,7 @@ void fem::impl::assemble_matrix(Mat A, const Form& a,
         = integrals.integral_domains(type::cell, i);
     fem::impl::assemble_cells(
         A, mesh, active_cells, dof_array0, num_dofs_per_cell0, dof_array1,
-        num_dofs_per_cell1, bc0, bc1, fn, coeff_fn, c_offsets);
+        num_dofs_per_cell1, bc0, bc1, fn, coeff_fn, coeff_array, c_offsets);
   }
 
   for (int i = 0; i < integrals.num_integrals(type::exterior_facet); ++i)
@@ -90,6 +99,7 @@ void fem::impl::assemble_cells(
     const std::function<void(PetscScalar*, const PetscScalar*, const double*,
                              const int*, const int*)>& kernel,
     const std::vector<const function::Function*>& coefficients,
+    Eigen::Ref<Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> coeff_array,
     const std::vector<int>& offsets)
 {
   assert(A);
@@ -113,7 +123,6 @@ void fem::impl::assemble_cells(
       coordinate_dofs(num_dofs_g, gdim);
   Eigen::Matrix<PetscScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
       Ae;
-  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array(offsets.back());
 
   // Iterate over active cells
   PetscErrorCode ierr;
@@ -133,8 +142,9 @@ void fem::impl::assemble_cells(
     // Update coefficients
     for (std::size_t i = 0; i < coefficients.size(); ++i)
     {
-      coefficients[i]->restrict(coeff_array.data() + offsets[i], cell,
-                                coordinate_dofs);
+      if (coefficients[i])
+        coefficients[i]->restrict(coeff_array.data() + offsets[i], cell,
+                                  coordinate_dofs);
     }
 
     // Tabulate tensor
