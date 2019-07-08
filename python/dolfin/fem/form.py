@@ -65,7 +65,6 @@ class Form(ufl.Form):
             except Exception:
                 pass
 
-
         if mesh is None:
             raise RuntimeError("Expecting to find a Mesh in the form.")
 
