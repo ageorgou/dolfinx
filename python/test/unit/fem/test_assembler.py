@@ -98,7 +98,6 @@ def test_constants_assembly():
 
     f = ufl.Constant(mesh)
     a = inner(f * u, v) * dx
-    L = inner(f, v) * dx
 
     a = dolfin.fem.Form(a)._cpp_object
     a.set_coefficient(0, None)
@@ -108,12 +107,7 @@ def test_constants_assembly():
     A.assemble()
     assert isinstance(A, PETSc.Mat)
 
-#    b = dolfin.fem.assemble_vector(L)
-#    b.ghostUpdate(addv=PETSc.InsertMode.ADD, mode=PETSc.ScatterMode.REVERSE)
-#    assert isinstance(b, PETSc.Vec)
-
-    normA = A.norm()
-    print(normA)
+    print(A.norm())
 
 
 def test_assembly_bcs():
