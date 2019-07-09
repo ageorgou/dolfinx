@@ -16,60 +16,33 @@ using namespace dolfin::fem;
 
 //-----------------------------------------------------------------------------
 FormCoefficients::FormCoefficients(
-    const std::vector<std::tuple<int, std::string,
-                                 std::shared_ptr<function::Function>>>& coeffs)
+    const std::vector<std::tuple<int, std::string, int>>& coeffs)
+    : _coefficients(coeffs.size()), _constants(coeffs.size()), _offsets(1, 0)
 {
   for (const auto& coeff : coeffs)
   {
     _original_pos.push_back(std::get<0>(coeff));
     _names.push_back(std::get<1>(coeff));
-    _coefficients.push_back(std::get<2>(coeff));
+    _offsets.push_back(_offsets.back() + std::get<2>(coeff));
   }
-  _constants.resize(_coefficients.size());
 }
 //-----------------------------------------------------------------------------
 int FormCoefficients::size() const { return _coefficients.size(); }
 //-----------------------------------------------------------------------------
-std::vector<int> FormCoefficients::offsets() const
-{
-  std::vector<int> n = {0};
-
-  // Same list size for coefficients and constants: any which are not set
-  // should be nullptr.
-  assert(_coefficients.size() == _constants.size());
-
-  for (std::size_t i = 0; i < _coefficients.size(); ++i)
-  {
-    if (_coefficients[i])
-    {
-      assert(!_constants[i]);
-      n.push_back(
-          n.back()
-          + _coefficients[i]->function_space()->element->space_dimension());
-    }
-    else if (_constants[i])
-      n.push_back(n.back() + _constants[i]->size());
-    else
-      throw std::runtime_error(
-          "Not all form coefficients/constants have been set.");
-  }
-  return n;
-}
+const std::vector<int>& FormCoefficients::offsets() const { return _offsets; }
 //-----------------------------------------------------------------------------
-Eigen::Array<PetscScalar, Eigen::Dynamic, 1>
-FormCoefficients::array(const std::vector<int>& offsets) const
+Eigen::Array<PetscScalar, Eigen::Dynamic, 1> FormCoefficients::array() const
 {
-  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array(offsets.back());
+  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array(_offsets.back());
 
   // Copy constants into array
-  // FIXME: why copy? maybe we just store the "coeff_array" here prefilled?
   for (std::size_t i = 0; i < _constants.size(); ++i)
   {
     if (_constants[i])
     {
       std::copy(_constants[i]->data(),
                 _constants[i]->data() + _constants[i]->size(),
-                coeff_array.data() + offsets[i]);
+                coeff_array.data() + _offsets[i]);
     }
   }
 
@@ -79,26 +52,30 @@ FormCoefficients::array(const std::vector<int>& offsets) const
 void FormCoefficients::set(
     int i, std::shared_ptr<const function::Function> coefficient)
 {
-  if (i >= (int)_coefficients.size())
+  int coeff_size = coefficient->function_space()->element->space_dimension();
+
+  if (i > _coefficients.size())
+    throw std::runtime_error("Cannot add coefficient");
+  else if (i == _coefficients.size())
   {
-    _coefficients.resize(i + 1);
-    _constants.resize(i + 1);
+    _coefficients.push_back(coefficient);
+    _constants.push_back(nullptr);
+    _offsets.push_back(_offsets.back() + coeff_size);
+    return;
   }
 
+  if (_offsets[i + 1] - _offsets[i] != coeff_size)
+    throw std::runtime_error("Invalid coefficient size");
+
   _coefficients[i] = coefficient;
+  _constants[i] = nullptr;
 }
 //-----------------------------------------------------------------------------
 void FormCoefficients::set(
     std::string name, std::shared_ptr<const function::Function> coefficient)
 {
   int i = get_index(name);
-  if (i >= (int)_coefficients.size())
-  {
-    _coefficients.resize(i + 1);
-    _constants.resize(i + 1);
-  }
-
-  _coefficients[i] = coefficient;
+  this->set(i, coefficient);
 }
 //-----------------------------------------------------------------------------
 std::shared_ptr<const function::Function> FormCoefficients::get(int i) const
@@ -111,11 +88,21 @@ void FormCoefficients::set_const(
     int i,
     Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> constant)
 {
-  if (i >= (int)_constants.size())
+  if (i > _constants.size())
+    throw std::runtime_error("Cannot add constant");
+  else if (i == _constants.size())
   {
-    _coefficients.resize(i + 1);
-    _constants.resize(i + 1);
+    _coefficients.push_back(nullptr);
+    _constants.push_back(
+        std::make_shared<
+            Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>(
+            constant));
+    _offsets.push_back(_offsets.back() + constant.size());
+    return;
   }
+
+  if (_offsets[i + 1] - _offsets[i] != constant.size())
+    throw std::runtime_error("Invalid constant size");
 
   _constants[i] = std::make_shared<
       Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>(constant);

@@ -532,23 +532,21 @@ fem::DofMap fem::create_dofmap(const ufc_dofmap& ufc_dofmap,
                 create_element_dof_layout(ufc_dofmap, mesh.type())));
 }
 //-----------------------------------------------------------------------------
-std::vector<std::tuple<int, std::string, std::shared_ptr<function::Function>>>
+std::vector<std::tuple<int, std::string, int>>
 fem::get_coeffs_from_ufc_form(const ufc_form& ufc_form)
 {
-  std::vector<std::tuple<int, std::string, std::shared_ptr<function::Function>>>
-      coeffs;
+  std::vector<std::tuple<int, std::string, int>> coeffs;
   const char** names = ufc_form.coefficient_name_map();
   for (int i = 0; i < ufc_form.num_coefficients; ++i)
   {
     ufc_finite_element* coeff_elem
         = ufc_form.create_finite_element(ufc_form.rank + i);
-    std::cout << "Creating coefficient of size " << coeff_elem->space_dimension
-              << "\n";
+    int coeff_size = coeff_elem->space_dimension;
+    std::cout << "Creating coefficient of size " << coeff_size << "\n";
     std::free(coeff_elem);
 
-    coeffs.push_back(
-        std::make_tuple<int, std::string, std::shared_ptr<function::Function>>(
-            ufc_form.original_coefficient_position(i), names[i], nullptr));
+    coeffs.push_back(std::make_tuple(ufc_form.original_coefficient_position(i),
+                                     names[i], coeff_size));
   }
   return coeffs;
 }

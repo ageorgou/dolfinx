@@ -35,7 +35,7 @@ public:
   /// shared_ptr<Function> may be a nullptr and assigned later.
   FormCoefficients(
       const std::vector<
-          std::tuple<int, std::string, std::shared_ptr<function::Function>>>&
+          std::tuple<int, std::string, int>>&
           coefficients);
 
   /// Get number of coefficients
@@ -44,7 +44,7 @@ public:
   /// Offset for each coefficient expansion array on a cell. Use to pack
   /// data for multiple coefficients in a flat array. The last entry is
   /// the size required to store all coefficients.
-  std::vector<int> offsets() const;
+  const std::vector<int>& offsets() const;
 
   /// Set coefficient with index i to be a Function
   void set(int i, std::shared_ptr<const function::Function> coefficient);
@@ -77,7 +77,7 @@ public:
   // Return an array of sufficient size to contain all coefficients and
   // constants, prefilled with any constant values.
   Eigen::Array<PetscScalar, Eigen::Dynamic, 1>
-  array(const std::vector<int>& offsets) const;
+  array() const;
 
 private:
   // Functions for the coefficients
@@ -93,6 +93,8 @@ private:
 
   // Names of coefficients
   std::vector<std::string> _names;
+
+  std::vector<int> _offsets;
 };
 } // namespace fem
 } // namespace dolfin

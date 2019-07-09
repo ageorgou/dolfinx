@@ -98,7 +98,7 @@ Form create_form(
     const std::vector<std::shared_ptr<const function::FunctionSpace>>& spaces);
 
 /// Extract coefficients from UFC form
-std::vector<std::tuple<int, std::string, std::shared_ptr<function::Function>>>
+std::vector<std::tuple<int, std::string, int>>
 get_coeffs_from_ufc_form(const ufc_form& ufc_form);
 
 /// Get dolfin::fem::CoordinateMapping from ufc

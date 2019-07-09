@@ -48,7 +48,7 @@ void fem::impl::assemble_matrix(Mat A, const Form& a,
   // Get array, prefilled with Constants, and offsets for Functions
   std::vector<int> c_offsets = coefficients.offsets();
   Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array
-      = coefficients.array(c_offsets);
+      = coefficients.array();
 
   const FormIntegrals& integrals = a.integrals();
   using type = fem::FormIntegrals::Type;
