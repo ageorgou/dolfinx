@@ -104,7 +104,6 @@ def test_constants_assembly():
     A = dolfin.fem.assemble_matrix(a)
     A.assemble()
     assert isinstance(A, PETSc.Mat)
-
     print(A.norm())
 
     f.value[0] += 2.0
@@ -112,8 +111,8 @@ def test_constants_assembly():
     A = dolfin.fem.assemble_matrix(a)
     A.assemble()
     assert isinstance(A, PETSc.Mat)
-
     print(A.norm())
+
 
 def test_assembly_bcs():
     mesh = dolfin.generation.UnitSquareMesh(dolfin.MPI.comm_world, 12, 12)
