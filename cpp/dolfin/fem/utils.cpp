@@ -540,6 +540,12 @@ fem::get_coeffs_from_ufc_form(const ufc_form& ufc_form)
   const char** names = ufc_form.coefficient_name_map();
   for (int i = 0; i < ufc_form.num_coefficients; ++i)
   {
+    ufc_finite_element* coeff_elem
+        = ufc_form.create_finite_element(ufc_form.rank + i);
+    std::cout << "Creating coefficient of size " << coeff_elem->space_dimension
+              << "\n";
+    std::free(coeff_elem);
+
     coeffs.push_back(
         std::make_tuple<int, std::string, std::shared_ptr<function::Function>>(
             ufc_form.original_coefficient_position(i), names[i], nullptr));
