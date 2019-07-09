@@ -108,8 +108,8 @@ std::shared_ptr<const function::Function> FormCoefficients::get(int i) const
 }
 //-----------------------------------------------------------------------------
 void FormCoefficients::set_const(
-    int i, std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
-               constant)
+    int i,
+    Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> constant)
 {
   if (i >= (int)_constants.size())
   {
@@ -117,14 +117,15 @@ void FormCoefficients::set_const(
     _constants.resize(i + 1);
   }
 
-  _constants[i] = constant;
+  _constants[i] = std::make_shared<
+      Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>(constant);
 }
 //-----------------------------------------------------------------------------
-std::shared_ptr<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
+Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
 FormCoefficients::get_const(int i) const
 {
   assert(i < (int)_constants.size());
-  return _constants[i];
+  return *_constants[i];
 }
 //-----------------------------------------------------------------------------
 int FormCoefficients::original_position(int i) const
