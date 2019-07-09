@@ -59,14 +59,14 @@ class Form(ufl.Form):
         # For every coefficient in form take its CPP object
         original_coefficients = form.coefficients()
         for i in range(self._cpp_object.num_coefficients()):
-            coeff = original_coefficients[i]
             j = self._cpp_object.original_coefficient_position(i)
+            coeff = original_coefficients[j]
             if hasattr(coeff, "_cpp_object"):
-                self._cpp_object.set_coefficient(j, coeff._cpp_object)
+                self._cpp_object.set_coefficient(i, coeff._cpp_object)
             elif hasattr(coeff, "value"):
                 if not isinstance(coeff.value, np.ndarray):
                     raise AttributeError("Constants must be type numpy.ndarray")
-                self._cpp_object.set_constant(j, coeff.value)
+                self._cpp_object.set_constant(i, coeff.value)
             else:
                 raise AttributeError("Coefficient neither constant nor function")
         if mesh is None:
