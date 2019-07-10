@@ -5,6 +5,8 @@
 // SPDX-License-Identifier:    LGPL-3.0-or-later
 
 #include "FormCoefficients.h"
+
+#include <dolfin/fem/Constant.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/function/FunctionSpace.h>
@@ -40,8 +42,8 @@ Eigen::Array<PetscScalar, Eigen::Dynamic, 1> FormCoefficients::array() const
   {
     if (_constants[i])
     {
-      std::copy(_constants[i]->data(),
-                _constants[i]->data() + _constants[i]->size(),
+      std::copy(_constants[i]->value.data(),
+                _constants[i]->value.data() + _constants[i]->value.size(),
                 coeff_array.data() + _offsets[i]);
     }
   }
@@ -84,35 +86,23 @@ std::shared_ptr<const function::Function> FormCoefficients::get(int i) const
   return _coefficients[i];
 }
 //-----------------------------------------------------------------------------
-void FormCoefficients::set_const(
-    int i,
-    Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> constant)
+void FormCoefficients::set_const(int i, std::shared_ptr<fem::Constant> constant)
+
 {
   if (i > (int)_constants.size())
     throw std::runtime_error("Cannot add constant");
   else if (i == (int)_constants.size())
   {
     _coefficients.push_back(nullptr);
-    _constants.push_back(
-        std::make_shared<
-            Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>(
-            constant));
-    _offsets.push_back(_offsets.back() + constant.size());
+    _constants.push_back(constant);
+    _offsets.push_back(_offsets.back() + constant->value.size());
     return;
   }
 
-  if (_offsets[i + 1] - _offsets[i] != constant.size())
+  if (_offsets[i + 1] - _offsets[i] != constant->value.size())
     throw std::runtime_error("Invalid constant size");
 
-  _constants[i] = std::make_shared<
-      Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>(constant);
-}
-//-----------------------------------------------------------------------------
-Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
-FormCoefficients::get_const(int i) const
-{
-  assert(i < (int)_constants.size());
-  return *_constants[i];
+  _constants[i] = constant;
 }
 //-----------------------------------------------------------------------------
 int FormCoefficients::original_position(int i) const

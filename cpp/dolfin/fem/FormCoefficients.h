@@ -22,6 +22,7 @@ class Function;
 
 namespace fem
 {
+class Constant;
 class FiniteElement;
 
 /// Storage for the coefficients of a Form consisting of Function and
@@ -34,9 +35,7 @@ public:
   /// (original_coeff_position, name, shared_ptr<function::Function>). The
   /// shared_ptr<Function> may be a nullptr and assigned later.
   FormCoefficients(
-      const std::vector<
-          std::tuple<int, std::string, int>>&
-          coefficients);
+      const std::vector<std::tuple<int, std::string, int>>& coefficients);
 
   /// Get number of coefficients
   int size() const;
@@ -57,13 +56,11 @@ public:
   std::shared_ptr<const function::Function> get(int i) const;
 
   /// Set constant coefficient i
-  void set_const(
-      int i,
-      Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> constant);
+  void set_const(int i, std::shared_ptr<fem::Constant> constant);
 
   /// Get constant coefficient i
-  Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
-  get_const(int i) const;
+  //  Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>
+  //  get_const(int i) const;
 
   /// Original position of coefficient in UFL form
   int original_position(int i) const;
@@ -76,17 +73,14 @@ public:
 
   // Return an array of sufficient size to contain all coefficients and
   // constants, prefilled with any constant values.
-  Eigen::Array<PetscScalar, Eigen::Dynamic, 1>
-  array() const;
+  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> array() const;
 
 private:
   // Functions for the coefficients
   std::vector<std::shared_ptr<const function::Function>> _coefficients;
 
   // Constant coefficients
-  std::vector<std::shared_ptr<
-      Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>>>>
-      _constants;
+  std::vector<std::shared_ptr<fem::Constant>> _constants;
 
   // Copy of 'original positions' in UFL form
   std::vector<int> _original_pos;

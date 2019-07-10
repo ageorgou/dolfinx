@@ -122,7 +122,7 @@ def test_constants_assembly():
     u, v = dolfin.TrialFunction(V), dolfin.TestFunction(V)
 
     f = ufl.Constant(mesh)
-    f.value = numpy.array([2.0], dtype=PETSc.ScalarType)
+    f.value = dolfin.cpp.fem.Constant([2.0])
 
     a = inner(f * u, v) * dx
 
@@ -131,7 +131,8 @@ def test_constants_assembly():
     assert isinstance(A, PETSc.Mat)
     print(A.norm())
 
-    f.value[0] += 2.0
+    print(f.value.value)
+    f.value.value = [4.0]
 
     A = dolfin.fem.assemble_matrix(a)
     A.assemble()

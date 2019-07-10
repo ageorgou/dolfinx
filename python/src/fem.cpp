@@ -293,12 +293,11 @@ void fem(py::module& m)
               std::shared_ptr<const dolfin::function::Function> f) {
              self.coeffs().set(i, f);
            })
-      .def(
-          "set_constant",
-          [](dolfin::fem::Form& self, std::size_t i,
-             Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> c) {
-            self.coeffs().set_const(i, c);
-          })
+      .def("set_constant",
+           [](dolfin::fem::Form& self, std::size_t i,
+              std::shared_ptr<dolfin::fem::Constant> c) {
+             self.coeffs().set_const(i, c);
+           })
       .def("set_mesh", &dolfin::fem::Form::set_mesh)
       .def("set_cell_domains", &dolfin::fem::Form::set_cell_domains)
       .def("set_exterior_facet_domains",
