@@ -54,9 +54,9 @@ void FormCoefficients::set(
 {
   int coeff_size = coefficient->function_space()->element->space_dimension();
 
-  if (i > _coefficients.size())
+  if (i > (int)_coefficients.size())
     throw std::runtime_error("Cannot add coefficient");
-  else if (i == _coefficients.size())
+  else if (i == (int)_coefficients.size())
   {
     _coefficients.push_back(coefficient);
     _constants.push_back(nullptr);
@@ -88,9 +88,9 @@ void FormCoefficients::set_const(
     int i,
     Eigen::Ref<const Eigen::Array<PetscScalar, Eigen::Dynamic, 1>> constant)
 {
-  if (i > _constants.size())
+  if (i > (int)_constants.size())
     throw std::runtime_error("Cannot add constant");
-  else if (i == _constants.size())
+  else if (i == (int)_constants.size())
   {
     _coefficients.push_back(nullptr);
     _constants.push_back(
