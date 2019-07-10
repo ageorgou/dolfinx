@@ -4,6 +4,7 @@ set(HEADERS
   assemble_scalar_impl.h
   assemble_vector_impl.h
   CoordinateMapping.h
+  Constant.h
   DirichletBC.h
   DiscreteOperators.h
   DofMapBuilder.h

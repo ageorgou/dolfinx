@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <dolfin/common/IndexMap.h>
 #include <dolfin/common/types.h>
+#include <dolfin/fem/Constant.h>
 #include <dolfin/fem/CoordinateMapping.h>
 #include <dolfin/fem/DirichletBC.h>
 #include <dolfin/fem/DiscreteOperators.h>
@@ -142,6 +143,12 @@ void fem(py::module& m)
           return dolfin::fem::DofMapBuilder::build(mesh, element_dof_layout);
         },
         "Build and dofmap on a mesh.");
+
+  py::class_<dolfin::fem::Constant, std::shared_ptr<dolfin::fem::Constant>>(
+      m, "Constant", "Storage for constant")
+      .def(py::init<Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic,
+                                 Eigen::RowMajor>>())
+      .def_readwrite("value", &dolfin::fem::Constant::value);
 
   // dolfin::fem::FiniteElement
   py::class_<dolfin::fem::FiniteElement,
