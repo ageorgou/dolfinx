@@ -9,7 +9,6 @@ import cffi
 
 import ufl
 from dolfin import cpp, fem, jit
-import numpy as np
 
 
 class Form(ufl.Form):
