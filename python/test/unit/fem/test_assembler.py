@@ -147,7 +147,7 @@ def test_constants_assembly():
     print(b.norm())
 
     f.value += 1.0
-    print (f.value)
+    print(f.value)
     b = dolfin.fem.assemble_vector(L)
     b.assemble()
     print(b.norm())
