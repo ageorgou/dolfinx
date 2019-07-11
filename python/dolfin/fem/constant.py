@@ -7,7 +7,7 @@
 
 import ufl
 import dolfin
-import numpy
+
 
 class Constant(ufl.Coefficient):
 
@@ -31,6 +31,7 @@ class Constant(ufl.Coefficient):
         else:
             arr = self._value.array()
             return arr[0, 0]
+
 
 class VectorConstant(ufl.Coefficient):
 
