@@ -309,12 +309,14 @@ void fem::impl::assemble_vector(
   assert(dofmap.element_dof_layout);
   const int num_dofs_per_cell = dofmap.element_dof_layout->num_dofs();
 
-  // Prepare coefficients
+  // Prepare coefficients (prefilling any constants)
   const FormCoefficients& coefficients = L.coeffs();
   std::vector<const function::Function*> coeff_fn(coefficients.size());
   for (int i = 0; i < coefficients.size(); ++i)
     coeff_fn[i] = coefficients.get(i).get();
   std::vector<int> c_offsets = coefficients.offsets();
+  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array
+      = coefficients.array();
 
   const FormIntegrals& integrals = L.integrals();
   using type = fem::FormIntegrals::Type;
@@ -325,7 +327,8 @@ void fem::impl::assemble_vector(
     const std::vector<std::int32_t>& active_cells
         = integrals.integral_domains(type::cell, i);
     fem::impl::assemble_cells(b, mesh, active_cells, dof_array,
-                              num_dofs_per_cell, fn, coeff_fn, c_offsets);
+                              num_dofs_per_cell, fn, coeff_fn, coeff_array,
+                              c_offsets);
   }
 
   for (int i = 0; i < integrals.num_integrals(type::exterior_facet); ++i)
@@ -357,6 +360,7 @@ void fem::impl::assemble_cells(
     const std::function<void(PetscScalar*, const PetscScalar*, const double*,
                              const int*, const int*)>& kernel,
     const std::vector<const function::Function*>& coefficients,
+    Eigen::Array<PetscScalar, Eigen::Dynamic, 1>& coeff_array,
     const std::vector<int>& offsets)
 {
   const int gdim = mesh.geometry().dim();
@@ -377,7 +381,6 @@ void fem::impl::assemble_cells(
   Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
       coordinate_dofs(num_dofs_g, gdim);
   Eigen::Matrix<PetscScalar, Eigen::Dynamic, 1> be(num_dofs_per_cell);
-  Eigen::Array<PetscScalar, Eigen::Dynamic, 1> coeff_array(offsets.back());
 
   // Iterate over active cells
   const int orientation = 0;
@@ -395,8 +398,9 @@ void fem::impl::assemble_cells(
     // Update coefficients
     for (std::size_t i = 0; i < coefficients.size(); ++i)
     {
-      coefficients[i]->restrict(coeff_array.data() + offsets[i], cell,
-                                coordinate_dofs);
+      if (coefficients[i])
+        coefficients[i]->restrict(coeff_array.data() + offsets[i], cell,
+                                  coordinate_dofs);
     }
 
     // Tabulate vector for cell

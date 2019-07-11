@@ -24,7 +24,7 @@ public:
       : value(val){};
 
   // Return reference to value
-  Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& array()
+  Eigen::Ref<Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> array()
   {
     return value;
   }

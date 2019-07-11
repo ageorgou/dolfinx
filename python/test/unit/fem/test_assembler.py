@@ -138,6 +138,20 @@ def test_constants_assembly():
     assert isinstance(A, PETSc.Mat)
     print(A.norm())
 
+    f = dolfin.fem.VectorConstant(mesh, [0.0, 1.0])
+    V = dolfin.VectorFunctionSpace(mesh, ("Lagrange", 1))
+    u, v = dolfin.TrialFunction(V), dolfin.TestFunction(V)
+    L = inner(f, v) * dx
+    b = dolfin.fem.assemble_vector(L)
+    b.assemble()
+    print(b.norm())
+
+    f.value += 1.0
+    print (f.value)
+    b = dolfin.fem.assemble_vector(L)
+    b.assemble()
+    print(b.norm())
+
 
 def test_assembly_bcs():
     mesh = dolfin.generation.UnitSquareMesh(dolfin.MPI.comm_world, 12, 12)
