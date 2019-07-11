@@ -62,10 +62,10 @@ class Form(ufl.Form):
             coeff = original_coefficients[j]
             if hasattr(coeff, "_cpp_object"):
                 self._cpp_object.set_coefficient(i, coeff._cpp_object)
-            elif hasattr(coeff, "value"):
-                if not isinstance(coeff.value, cpp.fem.Constant):
+            elif hasattr(coeff, "_value"):
+                if not isinstance(coeff._value, cpp.fem.Constant):
                     raise AttributeError("Constant wrong type")
-                self._cpp_object.set_constant(i, coeff.value)
+                self._cpp_object.set_constant(i, coeff._value)
             else:
                 raise AttributeError("Coefficient neither constant nor function")
         if mesh is None:

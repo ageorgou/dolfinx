@@ -10,6 +10,7 @@ from dolfin.fem.assemble import (assemble_scalar, assemble_vector_block,
                                  assemble_vector_nest, assemble_matrix,
                                  assemble_matrix_nest, assemble_matrix_block,
                                  set_bc, assemble_vector, apply_lifting)
+from dolfin.fem.constant import Constant, VectorConstant
 from dolfin.fem.coordinatemapping import create_coordinate_map
 from dolfin.fem.dirichletbc import DirichletBC
 from dolfin.fem.dofmap import DofMap

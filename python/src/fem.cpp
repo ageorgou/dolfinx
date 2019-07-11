@@ -148,7 +148,8 @@ void fem(py::module& m)
       m, "Constant", "Storage for constant")
       .def(py::init<Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic,
                                  Eigen::RowMajor>>())
-      .def_readwrite("value", &dolfin::fem::Constant::value);
+      .def("array", &dolfin::fem::Constant::array,
+           py::return_value_policy::reference_internal);
 
   // dolfin::fem::FiniteElement
   py::class_<dolfin::fem::FiniteElement,

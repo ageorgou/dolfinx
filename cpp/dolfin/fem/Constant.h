@@ -23,6 +23,12 @@ public:
           val)
       : value(val){};
 
+  // Return reference to value
+  Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& array()
+  {
+    return value;
+  }
+
   /// Value
   Eigen::Array<PetscScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
       value;
