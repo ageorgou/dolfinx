@@ -131,7 +131,7 @@ def test_constants_assembly():
     print(A.norm())
 
     print(f.value)
-    f.value = 4.0
+    f.value += 4.0
 
     A = dolfin.fem.assemble_matrix(a)
     A.assemble()

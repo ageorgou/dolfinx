@@ -26,7 +26,7 @@ __all__ = [
     "apply_lifting", "assemble_scalar", "assemble_vector",
     "assemble_vector_block", "assemble_vector_nest",
     "assemble_matrix_block", "assemble_matrix_nest",
-    "assemble_matrix", "set_bc", "create_coordinate_map",
+    "assemble_matrix", "set_bc", "create_coordinate_map", "Constant", "VectorConstant",
     "DirichletBC", "DofMap", "Form", "derivative", "adjoint", "increase_order",
     "tear", "interpolate", "project", "solve"
 ]
